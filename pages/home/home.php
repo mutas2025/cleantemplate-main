@@ -1,111 +1,116 @@
-<?php
-// Database connection
- $host = 'localhost';
- $dbname = 'student_management';
- $username = 'root';
- $password = '';
+<?php 
+// Database connection 
+ $host = 'localhost'; 
+ $dbname = 'student_management'; 
+ $username = 'root'; 
+ $password = ''; 
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
-}
+try { 
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password); 
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
+} catch(PDOException $e) { 
+    die("Connection failed: " . $e->getMessage()); 
+} 
 
-// Initialize variables
- $success_message = '';
- $error_message = '';
- $edit_student = null;
+// Initialize variables 
+ $success_message = ''; 
+ $error_message = ''; 
+ $edit_student = null; 
 
-// Handle form submissions
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
-        switch ($_POST['action']) {
-            case 'add_student':
-                try {
-                    $stmt = $pdo->prepare("INSERT INTO students (firstname, lastname, middlename, age, year_level, course, section) 
-                                          VALUES (?, ?, ?, ?, ?, ?, ?)");
-                    $stmt->execute([
-                        $_POST['firstname'],
-                        $_POST['lastname'],
-                        $_POST['middlename'] ?? null,
-                        $_POST['age'],
-                        $_POST['year_level'],
-                        $_POST['course'],
-                        $_POST['section']
-                    ]);
-                    $success_message = "Student added successfully!";
-                } catch(PDOException $e) {
-                    $error_message = "Error adding student: " . $e->getMessage();
-                }
-                break;
-                
-            case 'edit_student':
-                try {
-                    $stmt = $pdo->prepare("UPDATE students SET firstname=?, lastname=?, middlename=?, age=?, year_level=?, course=?, section=? 
-                                          WHERE id=?");
-                    $stmt->execute([
-                        $_POST['firstname'],
-                        $_POST['lastname'],
-                        $_POST['middlename'] ?? null,
-                        $_POST['age'],
-                        $_POST['year_level'],
-                        $_POST['course'],
+// Handle form submissions 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { 
+    if (isset($_POST['action'])) { 
+        switch ($_POST['action']) { 
+            case 'add_student': 
+                try { 
+                    // Added username, password, contactno, account_type
+                    $stmt = $pdo->prepare("INSERT INTO students (firstname, lastname, middlename, age, year_level, course, section, username, password, contactno, account_type) 
+                                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"); 
+                    $stmt->execute([ 
+                        $_POST['firstname'], 
+                        $_POST['lastname'], 
+                        $_POST['middlename'] ?? null, 
+                        $_POST['age'], 
+                        $_POST['year_level'], 
+                        $_POST['course'], 
                         $_POST['section'],
-                        $_POST['id']
-                    ]);
-                    $success_message = "Student updated successfully!";
-                } catch(PDOException $e) {
-                    $error_message = "Error updating student: " . $e->getMessage();
-                }
-                break;
-                
-            case 'delete_student':
-                try {
-                    $stmt = $pdo->prepare("DELETE FROM students WHERE id=?");
-                    $stmt->execute([$_POST['id']]);
-                    $success_message = "Student deleted successfully!";
-                } catch(PDOException $e) {
-                    $error_message = "Error deleting student: " . $e->getMessage();
-                }
-                break;
-        }
-    }
-}
+                        $_POST['username'],
+                        $_POST['password'], // Note: Hash this in production
+                        $_POST['contactno'],
+                        $_POST['account_type']
+                    ]); 
+                    $success_message = "Student added successfully!"; 
+                } catch(PDOException $e) { 
+                    $error_message = "Error adding student: " . $e->getMessage(); 
+                } 
+                break; 
+                        
+            case 'edit_student': 
+                try { 
+                    // Added username, password, contactno, account_type
+                    $stmt = $pdo->prepare("UPDATE students SET firstname=?, lastname=?, middlename=?, age=?, year_level=?, course=?, section=?, username=?, password=?, contactno=?, account_type=? 
+                                           WHERE id=?"); 
+                    $stmt->execute([ 
+                        $_POST['firstname'], 
+                        $_POST['lastname'], 
+                        $_POST['middlename'] ?? null, 
+                        $_POST['age'], 
+                        $_POST['year_level'], 
+                        $_POST['course'], 
+                        $_POST['section'], 
+                        $_POST['id'],
+                        $_POST['username'],
+                        $_POST['password'], // Note: Hash this in production
+                        $_POST['contactno'],
+                        $_POST['account_type']
+                    ]); 
+                    $success_message = "Student updated successfully!"; 
+                } catch(PDOException $e) { 
+                    $error_message = "Error updating student: " . $e->getMessage(); 
+                } 
+                break; 
+                        
+            case 'delete_student': 
+                try { 
+                    $stmt = $pdo->prepare("DELETE FROM students WHERE id=?"); 
+                    $stmt->execute([$_POST['id']]); 
+                    $success_message = "Student deleted successfully!"; 
+                } catch(PDOException $e) { 
+                    $error_message = "Error deleting student: " . $e->getMessage(); 
+                } 
+                break; 
+        } 
+    } 
+} 
 
-// Handle edit request
-if (isset($_GET['edit_id'])) {
-    $stmt = $pdo->prepare("SELECT * FROM students WHERE id=?");
-    $stmt->execute([$_GET['edit_id']]);
-    $edit_student = $stmt->fetch(PDO::FETCH_ASSOC);
-}
+// Handle edit request 
+if (isset($_GET['edit_id'])) { 
+    $stmt = $pdo->prepare("SELECT * FROM students WHERE id=?"); 
+    $stmt->execute([$_GET['edit_id']]); 
+    $edit_student = $stmt->fetch(PDO::FETCH_ASSOC); 
+} 
 
-// Fetch all students
- $stmt = $pdo->query("SELECT * FROM students ORDER BY id DESC");
- $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
-?>
-<!DOCTYPE html>
-<!--
-This is a starter template page. Use this page to start your new project from
-scratch. This page gets rid of all links and provides the needed markup only.
--->
+// Fetch all students 
+ $stmt = $pdo->query("SELECT * FROM students ORDER BY id DESC"); 
 
-<html lang="en">
+ $students = $stmt->fetchAll(PDO::FETCH_ASSOC); 
+?> 
+<!DOCTYPE html> 
+<html lang="en"> 
 
-<head>
-
+<head> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Student Management System</title>
+    <title>Student Management System</title> 
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="../../dist/css/font.css">
     <!-- BS Stepper -->
-    <link rel="stylesheet" href="../../plugins/bs-stepper/css/bs-stepper.min.css">
+    <link rel="stylesheet" href="../../plugins/bs-stepper/css/bs-stepper.min.css"> 
 
     <!-- DataTables -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap4.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap4.css"> 
 
     <!-- iCheck for checkboxes and radio inputs -->
     <link rel="stylesheet" href="../../plugins/icheck-bootstrap/icheck-bootstrap.min.css">
@@ -123,19 +128,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <link rel="stylesheet" href="../../plugins/dropzone/min/dropzone.min.css" type="text/css" />
     <link rel="icon" type="image/png" sizes="40x16" href="../../dist/img/splogo.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.0/dist/sweetalert2.min.css">
-    <link rel="stylesheet" href="../../plugins/ekko-lightbox/ekko-lightbox.css">
+    <link rel="stylesheet" href="../../plugins/ekko-lightbox/ekko-lightbox.css"> 
 
     <!-- new -->
-    <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css"> 
 
     <!-- Toastr -->
     <style>
-        /* Center text in DataTables */
+        /* Center text in DataTables */ 
 
-        /* form */
+        /* form */ 
 
-        /* submit button */
-
+        /* submit button */ 
         .custom-submit-from-button {
             font-family: inherit;
             font-size: 26px;
@@ -154,7 +158,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             background: #f00;
             color: white;
             height: 60px;
-        }
+        } 
 
         .swal2-image {
             animation: fly-1 2s ease-in-out infinite alternate;
@@ -164,29 +168,29 @@ scratch. This page gets rid of all links and provides the needed markup only.
             margin-bottom: -32px;
             /* Adjust the size as needed */
             height: 100px;
-        }
+        } 
 
         .animate-fly {
             animation: fly-1 2s ease-in-out infinite alternate;
-        }
+        } 
 
         @keyframes fly-1 {
             from {
                 transform: translate(1em, 4px) rotate(-3deg);
-            }
+            } 
 
             to {
                 transform: translate(1em, 3px) rotate(3deg);
             }
-        }
+        } 
 
         .datatable-header {
             min-width: 100%;
-        }
+        } 
 
         .datatable-body {
             min-width: 100%;
-        }
+        } 
 
         .overlay {
             position: fixed;
@@ -197,21 +201,21 @@ scratch. This page gets rid of all links and provides the needed markup only.
             background-color: rgba(0, 0, 0, 0.9);
             z-index: 9999;
             /* Above Bootstrap's modal overlay */
-        }
+        } 
 
         .overlay-content {
             position: absolute;
             top: 50%;
             left: 60%;
             transform: translate(-50%, -50%);
-        }
+        } 
 
         /* Ensure .btn-close is visible on the dark background */
         .imageSpinner {
             filter: invert(1);
             mix-blend-mode: multiply;
             width: 30%;
-        }
+        } 
 
         /* animate */
         .overlay {
@@ -220,67 +224,67 @@ scratch. This page gets rid of all links and provides the needed markup only.
             /* Hidden by default */
             opacity: 0;
             transition: opacity .3s ease-in-out;
-        }
+        } 
 
         .overlay.active {
             display: block;
             /* Show overlay */
             opacity: 1;
-        }
+        } 
 
         #unit-masterlist-table-view tr td .view-modal {
             background-color: transparent;
-        }
+        } 
 
         .nav-icon {
             margin-bottom: 2px;
-        }
+        } 
 
         .text {
             font-size: 14px !important;
             color: #fff;
-        }
+        } 
 
         .dropdown .nav-item .nav-link {
             border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-        }
+        } 
 
         .portrait {
             height: 100px !important;
-        }
+        } 
 
         .portrait-sidebar {
             height: 32px !important;
-        }
+        } 
 
         #table-body-unit {
             font-size: 15px;
             /* font-weight: bold; */
             text-align: center;
-        }
+        } 
 
         .rounded-circle {
             border-radius: 30px !important;
-        }
+        } 
 
         .table td {
             vertical-align: middle !important;
-        }
+        } 
 
         .row-chassis {
             font-size: 12px;
-        }
+        } 
 
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
-        }
+        } 
 
         input[type="number"] {
             -moz-appearance: textfield;
             appearance: textfield;
-        }
+        } 
 
         .name {
             display: inline-block;
@@ -288,58 +292,58 @@ scratch. This page gets rid of all links and provides the needed markup only.
             white-space: nowrap;
             overflow: hidden !important;
             text-overflow: ellipsis;
-        }
+        } 
 
         .ribbon-wrapper {
             height: 57px !important;
             right: -1px !important;
-        }
+        } 
 
         .dz-upload {
             background-color: green;
             display: block;
             height: 10px;
             width: 0%;
-        }
+        } 
 
         #container-image {
             display: inline-block;
             overflow: hidden;
             /* clip the excess when child gets bigger than parent */
-        }
+        } 
 
         #container-image img {
             display: block;
             transition: transform .4s;
             /* smoother zoom */
-        }
+        } 
 
         #container-image:hover img {
             transform: scale(1.3);
             transform-origin: 50% 50%;
-        }
+        } 
 
         .nav-tabs .nav-item .nav-link {
             color: black
-        }
+        } 
 
         .user-panel .info {
             display: inline-block;
             padding: 8px 5px 10px 10px;
-        }
+        } 
 
         .user-panel img {
             height: 33px;
-        }
+        } 
 
         .portrait-sidebar {
             height: 32px !important;
             width: 33px;
-        }
+        } 
 
         #upload-adtl-file {
             width: 240px
-        }
+        } 
 
         #table_masterlist.dataTable thead th,
         #table_pending_franchise.dataTable thead th,
@@ -354,7 +358,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             color: white;
             text-align: center;
             /* Optional: change text color */
-        }
+        } 
 
         #table_masterlist.dataTable tbody td,
         #table_pending_franchise.dataTable tbody td,
@@ -362,21 +366,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
         #table_about_expire_franchise.dataTable tbody td,
         #table_history_franchise.dataTable tbody td,
         #unit-masterlist-table-view.dataTable tbody td,
-        #unit-masterlist-table-view.dataTable thead th {
-
+        #unit-masterlist-table-view.dataTable thead th { 
             text-align: center;
             /* Optional: change text color */
-        }
+        } 
 
         .introjs-skipbutton {
             color: black;
             border-radius: 5px;
             border: none;
-            cursor: pointer;
+            cursor: pointer; 
 
             font-size: 17px;
             font-weight: lighter;
-        }
+        } 
 
         /* Position the tooltip below the target element */
         .introjs-tooltip {
@@ -398,13 +401,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
             /* Include padding in size calculations */
             overflow: hidden;
             /* Hide overflow content */
-        }
+        } 
 
         /* Ensure tooltip text wraps properly */
         .introjs-tooltip .introjs-tooltiptext {
             word-wrap: break-word;
             white-space: normal;
-        }
+        } 
 
         /* Position buttons within the tooltip */
         .introjs-tooltipbuttons {
@@ -412,7 +415,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             /* Align buttons to the right */
             margin-top: 10px;
             /* Add space between content and buttons */
-        }
+        } 
 
         /* Ensure the tooltip is positioned correctly on small screens */
         @media (max-width: 768px) {
@@ -424,14 +427,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 max-width: 80vw;
                 /* Adjust max width on small screens */
             }
-        }
+        } 
 
         #edit_application .nav .active {
             background-color: #6c757d;
             font-weight: bold;
             color: white;
             border-bottom: 0;
-        }
+        } 
 
         #openViewModalBody .nav .active {
             background-color: #6c757d;
@@ -439,7 +442,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             color: white;
             margin-left: -1px;
             border-bottom: 0;
-        }
+        } 
 
         /* Student Table Styles */
         #studentTable.dataTable thead th {
@@ -447,35 +450,41 @@ scratch. This page gets rid of all links and provides the needed markup only.
             border-color: #4b545c;
             color: white;
             text-align: center;
-        }
+        } 
 
         #studentTable.dataTable tbody td {
             text-align: center;
             vertical-align: middle !important;
-        }
+        } 
 
         .action-buttons {
             display: flex;
             justify-content: center;
             gap: 5px;
-        }
+        } 
 
         .btn-sm {
             padding: 0.25rem 0.5rem;
             font-size: 0.875rem;
         }
-    </style>
+        
+        /* Card heights for consistency */
+        .card-body {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+    </style> 
 
-</head>
-<!-- oncontextmenu="return false" -->
+</head> 
+<!-- oncontextmenu="return false" --> 
 
-<body class="sidebar-mini layout-fixed" style="height: auto">
+<body class="sidebar-mini layout-fixed" style="height: auto"> 
 
     <div class="wrapper">
         <!-- Preloader -->
         <div class="preloader flex-column justify-content-center align-items-center">
             <img class="" src="../../dist/img/itcsologo.webp" alt="AdminLTELogo" height="60" width="60">
-        </div>
+        </div> 
 
         <!-- Navbar -->
         <nav class="main-header navbar sticky-top navbar-expand navbar-dark navbar-dark">
@@ -493,7 +502,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         <a class="nav-link text-sm" data-widget="fullscreen" href="#" role="button">
                             <i class="fas fa-expand-arrows-alt text-white"></i>
                         </a>
-                    </li>
+                    </li> 
 
                     <li class="nav-item dropdown">
                         <a class="nav-link text-sm pt-0 pb-0" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
@@ -518,16 +527,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 <i class="fa-solid p-1 fa-right-from-bracket" style="background-color: rgb(16 16 16 / 42%); border-radius: 22px ; padding: 9px !important;"></i> &nbsp Logout
                             </a>
                         </div>
-                    </li>
+                    </li> 
 
                 </ul>
             </div>
         </nav>
-        <!-- /.navbar -->
+        <!-- /.navbar --> 
 
-        <?php include '../../pages/sidebar/sidebar.php' ?>
+        <?php include '../../pages/sidebar/sidebar.php' ?> 
 
-        <!-- body content -->
+        <!-- body content --> 
 
         <div id="body_wrapper" class="content-wrapper">
             <!-- Content Header (Page header) -->
@@ -545,7 +554,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> 
 
             <!-- PUT THE CONTENTS HERE -->
             <div class="content">
@@ -556,7 +565,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         <h5><i class="icon fas fa-check"></i> Success!</h5>
                         <?php echo $success_message; ?>
                     </div>
-                <?php endif; ?>
+                <?php endif; ?> 
                 
                 <?php if ($error_message): ?>
                     <div class="alert alert-danger alert-dismissible">
@@ -564,11 +573,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         <h5><i class="icon fas fa-ban"></i> Error!</h5>
                         <?php echo $error_message; ?>
                     </div>
-                <?php endif; ?>
+                <?php endif; ?> 
 
                 <div class="row">
                     <!-- Add Student Card -->
-                    <div class="col-6">
+                    <div class="col-lg-6">
                         <div class="card card-success card-outline">
                             <div class="card-header">
                                 <h3 class="card-title">Add Students</h3>
@@ -630,6 +639,40 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- New Fields -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="username">Username</label>
+                                                <input type="text" class="form-control" id="username" name="username" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="password">Password</label>
+                                                <input type="password" class="form-control" id="password" name="password" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="contactno">Contact No.</label>
+                                                <input type="text" class="form-control" id="contactno" name="contactno" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="account_type">Account Type</label>
+                                                <select class="form-control" id="account_type" name="account_type" required>
+                                                    <option value="">Select Type</option>
+                                                    <option value="Student">Student</option>
+                                                    <option value="Teacher">Teacher</option>
+                                                    <option value="Admin">Admin</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="card-footer text-right">
                                     <button type="submit" class="btn btn-success">
@@ -638,10 +681,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 </div>
                             </form>
                         </div>
-                    </div>
+                    </div> 
 
                     <!-- Student List Card -->
-                    <div class="col-6">
+                    <div class="col-lg-6">
                         <div class="card card-danger card-outline">
                             <div class="card-header">
                                 <h3 class="card-title">Student Lists</h3>
@@ -652,8 +695,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                         <tr>
                                             <th>ID</th>
                                             <th>Full Name</th>
-                                            <th>Grade</th>
+                                            <th>Year</th>
                                             <th>Section</th>
+                                            <th>Account Type</th>
                                             <th>Options</th>
                                         </tr>
                                     </thead>
@@ -665,6 +709,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                                     <td><?php echo $student['firstname'] . ' ' . $student['lastname']; ?></td>
                                                     <td><?php echo $student['year_level']; ?></td>
                                                     <td><?php echo $student['section']; ?></td>
+                                                    <td><?php echo $student['account_type']; ?></td>
                                                     <td>
                                                         <div class="action-buttons">
                                                             <a href="?edit_id=<?php echo $student['id']; ?>" class="btn btn-warning btn-sm">
@@ -679,17 +724,17 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <tr>
-                                                <td colspan="5" class="text-center">No students found</td>
+                                                <td colspan="6" class="text-center">No students found</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                    </div>
+                    </div> 
 
                     <!-- Edit Student Card -->
-                    <div class="col-6">
+                    <div class="col-12">
                         <div class="card card-secondary card-outline">
                             <div class="card-header">
                                 <h3 class="card-title">Edit Students</h3>
@@ -700,39 +745,37 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                     <input type="hidden" name="id" value="<?php echo $edit_student['id']; ?>">
                                     <div class="card-body">
                                         <div class="row">
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="edit_firstname">First Name</label>
                                                     <input type="text" class="form-control" id="edit_firstname" name="firstname" 
-                                                           value="<?php echo $edit_student['firstname']; ?>" required>
+                                                            value="<?php echo $edit_student['firstname']; ?>" required>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="edit_lastname">Last Name</label>
                                                     <input type="text" class="form-control" id="edit_lastname" name="lastname" 
-                                                           value="<?php echo $edit_student['lastname']; ?>" required>
+                                                            value="<?php echo $edit_student['lastname']; ?>" required>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="edit_middlename">Middle Name</label>
                                                     <input type="text" class="form-control" id="edit_middlename" name="middlename" 
-                                                           value="<?php echo $edit_student['middlename']; ?>">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="edit_age">Age</label>
-                                                    <input type="number" class="form-control" id="edit_age" name="age" 
-                                                           value="<?php echo $edit_student['age']; ?>" min="1" max="100" required>
+                                                            value="<?php echo $edit_student['middlename']; ?>">
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="edit_age">Age</label>
+                                                    <input type="number" class="form-control" id="edit_age" name="age" 
+                                                            value="<?php echo $edit_student['age']; ?>" min="1" max="100" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="edit_year_level">Year Level</label>
                                                     <select class="form-control" id="edit_year_level" name="year_level" required>
@@ -744,18 +787,53 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="edit_course">Course</label>
                                                     <input type="text" class="form-control" id="edit_course" name="course" 
-                                                           value="<?php echo $edit_student['course']; ?>" required>
+                                                            value="<?php echo $edit_student['course']; ?>" required>
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="edit_section">Section</label>
                                                     <input type="text" class="form-control" id="edit_section" name="section" 
-                                                           value="<?php echo $edit_student['section']; ?>" required>
+                                                            value="<?php echo $edit_student['section']; ?>" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- New Edit Fields -->
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="edit_username">Username</label>
+                                                    <input type="text" class="form-control" id="edit_username" name="username" 
+                                                            value="<?php echo $edit_student['username']; ?>" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="edit_password">Password</label>
+                                                    <input type="password" class="form-control" id="edit_password" name="password" 
+                                                            value="<?php echo $edit_student['password']; ?>" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="edit_contactno">Contact No.</label>
+                                                    <input type="text" class="form-control" id="edit_contactno" name="contactno" 
+                                                            value="<?php echo $edit_student['contactno']; ?>" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="edit_account_type">Account Type</label>
+                                                    <select class="form-control" id="edit_account_type" name="account_type" required>
+                                                        <option value="">Select Type</option>
+                                                        <option value="Student" <?php echo $edit_student['account_type'] == 'Student' ? 'selected' : ''; ?>>Student</option>
+                                                        <option value="Teacher" <?php echo $edit_student['account_type'] == 'Teacher' ? 'selected' : ''; ?>>Teacher</option>
+                                                        <option value="Admin" <?php echo $edit_student['account_type'] == 'Admin' ? 'selected' : ''; ?>>Admin</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -776,16 +854,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     </div>
                 </div>
             </div>
-        </div>
+        </div> 
 
-    </div>
+    </div> 
 
     <div class="overlay" id="myOverlay">
         <div class="overlay-content">
             <img src="../../dist/img/load.gif" class="imageSpinner" alt="" srcset="">
             <!-- Your content here -->
         </div>
-    </div>
+    </div> 
 
     <!-- Control Sidebar -->
     <aside class="control-sidebar control-sidebar-dark">
@@ -795,7 +873,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <p>Sidebar content</p>
         </div>
     </aside>
-    <!-- /.control-sidebar -->
+    <!-- /.control-sidebar --> 
 
     <!-- Main Footer -->
     <footer class="main-footer">
@@ -807,7 +885,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <strong>Copyright &copy; 2024 Student Management System.</strong>
     </footer>
     </div>
-    <!-- ./wrapper -->
+    <!-- ./wrapper --> 
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
@@ -830,24 +908,24 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 </div>
             </div>
         </div>
-    </div>
+    </div> 
 
-    <!-- REQUIRED SCRIPTS -->
+    <!-- REQUIRED SCRIPTS --> 
 
     <!-- jQuery -->
     <script src="../../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <!-- BS-Stepper -->
-    <script src="../../plugins/bs-stepper/js/bs-stepper.min.js"></script>
+    <script src="../../plugins/bs-stepper/js/bs-stepper.min.js"></script> 
 
     <!-- AdminLTE App -->
-    <script src="../../dist/js/adminlte.min.js"></script>
+    <script src="../../dist/js/adminlte.min.js"></script> 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
-    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap4.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap4.js"></script> 
 
     <!-- <script src="../../plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script> -->
     <script src="../../plugins/pdfmake/vfs_fonts.js"></script>
@@ -857,12 +935,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script src="../../plugins/fontawesomekit/a757e6f388.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.0/dist/sweetalert2.all.min.js"></script>
     <script src="../../plugins/ekko-lightbox/ekko-lightbox.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> 
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
 
     <!-- new  -->
-    <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
+    <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script> 
 
     <script>
         $(document).ready(function() {
@@ -875,7 +953,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 "info": true,
                 "paging": true,
                 "pageLength": 5
-            });
+            }); 
 
             // Show success/error messages with SweetAlert
             <?php if ($success_message): ?>
@@ -886,7 +964,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     timer: 3000,
                     showConfirmButton: false
                 });
-            <?php endif; ?>
+            <?php endif; ?> 
             
             <?php if ($error_message): ?>
                 Swal.fire({
@@ -897,12 +975,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     showConfirmButton: false
                 });
             <?php endif; ?>
-        });
+        }); 
 
         function confirmDelete(id) {
             $('#delete_id').val(id);
             $('#deleteModal').modal('show');
-        }
+        } 
 
         function logout() {
             Swal.fire({
@@ -918,14 +996,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     window.location.href = 'logout.php';
                 }
             });
-        }
+        } 
 
         // Show overlay when form is submitted
         $('form').on('submit', function() {
             $('#myOverlay').addClass('active');
         });
-    </script>
+    </script> 
 
-</body>
+</body> 
 
 </html>
