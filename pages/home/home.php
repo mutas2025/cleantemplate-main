@@ -1,16 +1,5 @@
 <?php 
-// Database connection 
- $host = 'localhost'; 
- $dbname = 'student_management'; 
- $username = 'root'; 
- $password = ''; 
-
-try { 
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password); 
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
-} catch(PDOException $e) { 
-    die("Connection failed: " . $e->getMessage()); 
-} 
+include('../../config/config.php');
 
 // Initialize variables 
  $success_message = ''; 
@@ -23,9 +12,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         switch ($_POST['action']) { 
             case 'add_student': 
                 try { 
-                    // Added username, password, contactno, account_type
+                    // Hash the password before storing
+                    $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
                     $stmt = $pdo->prepare("INSERT INTO students (firstname, lastname, middlename, age, year_level, course, section, username, password, contactno, account_type) 
                                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"); 
+                    
+                    // Execute with correct order
                     $stmt->execute([ 
                         $_POST['firstname'], 
                         $_POST['lastname'], 
@@ -35,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_POST['course'], 
                         $_POST['section'],
                         $_POST['username'],
-                        $_POST['password'], // Note: Hash this in production
+                        $hashed_password, // Use hashed password
                         $_POST['contactno'],
                         $_POST['account_type']
                     ]); 
@@ -47,9 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
             case 'edit_student': 
                 try { 
-                    // Added username, password, contactno, account_type
+                    // Hash the password if it's changed (or keep old one if blank - logic depends on requirements)
+                    // For now, we assume password is always updated in this form
+                    $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
                     $stmt = $pdo->prepare("UPDATE students SET firstname=?, lastname=?, middlename=?, age=?, year_level=?, course=?, section=?, username=?, password=?, contactno=?, account_type=? 
                                            WHERE id=?"); 
+                    
+                    // FIX: The ID must be the LAST item in the array because the WHERE clause is last
                     $stmt->execute([ 
                         $_POST['firstname'], 
                         $_POST['lastname'], 
@@ -58,11 +56,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_POST['year_level'], 
                         $_POST['course'], 
                         $_POST['section'], 
-                        $_POST['id'],
                         $_POST['username'],
-                        $_POST['password'], // Note: Hash this in production
+                        $hashed_password, // Use hashed password
                         $_POST['contactno'],
-                        $_POST['account_type']
+                        $_POST['account_type'],
+                        $_POST['id'] // <--- MOVED TO END
                     ]); 
                     $success_message = "Student updated successfully!"; 
                 } catch(PDOException $e) { 
@@ -92,9 +90,8 @@ if (isset($_GET['edit_id'])) {
 
 // Fetch all students 
  $stmt = $pdo->query("SELECT * FROM students ORDER BY id DESC"); 
-
  $students = $stmt->fetchAll(PDO::FETCH_ASSOC); 
-?> 
+?>  
 <!DOCTYPE html> 
 <html lang="en"> 
 
