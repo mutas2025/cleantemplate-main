@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Hash the password before storing
                     $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-                    $stmt = $pdo->prepare("INSERT INTO students (firstname, lastname, middlename, age, year_level, course, section, username, password, contactno, account_type) 
+                    $stmt = $pdo->prepare("INSERT INTO users (firstname, lastname, middlename, age, year_level, course, section, username, password, contactno, account_type) 
                                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"); 
                     
                     // Execute with correct order
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // For now, we assume password is always updated in this form
                     $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-                    $stmt = $pdo->prepare("UPDATE students SET firstname=?, lastname=?, middlename=?, age=?, year_level=?, course=?, section=?, username=?, password=?, contactno=?, account_type=? 
+                    $stmt = $pdo->prepare("UPDATE users SET firstname=?, lastname=?, middlename=?, age=?, year_level=?, course=?, section=?, username=?, password=?, contactno=?, account_type=? 
                                            WHERE id=?"); 
                     
                     // FIX: The ID must be the LAST item in the array because the WHERE clause is last
@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
             case 'delete_student': 
                 try { 
-                    $stmt = $pdo->prepare("DELETE FROM students WHERE id=?"); 
+                    $stmt = $pdo->prepare("DELETE FROM users WHERE id=?"); 
                     $stmt->execute([$_POST['id']]); 
                     $success_message = "Student deleted successfully!"; 
                 } catch(PDOException $e) { 
@@ -83,13 +83,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Handle edit request 
 if (isset($_GET['edit_id'])) { 
-    $stmt = $pdo->prepare("SELECT * FROM students WHERE id=?"); 
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id=?"); 
     $stmt->execute([$_GET['edit_id']]); 
     $edit_student = $stmt->fetch(PDO::FETCH_ASSOC); 
 } 
 
 // Fetch all students 
- $stmt = $pdo->query("SELECT * FROM students ORDER BY id DESC"); 
+ $stmt = $pdo->query("SELECT * FROM users ORDER BY id DESC"); 
  $students = $stmt->fetchAll(PDO::FETCH_ASSOC); 
 ?>  
 <!DOCTYPE html> 
