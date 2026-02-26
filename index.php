@@ -199,6 +199,28 @@
         });
         $('#submit_login').click(function(e) {
             e.preventDefault();
+            const usename = $('#username').val();
+            const password = $('#password').val();
+            $.ajax({
+                url:'api/login.php',type: 'POST',consetType:'application/json',
+                data:JSON.stringify({username,password}),
+                success:function(response){
+                    if (response.status==='successs'){
+                        Toast.fire({
+                            icon:'success',title:'Login successful!'
+                        });
+                    setTimout(function(){
+                        window.location.href='pages/home/index.php';
+                    
+                    }, 1000);
+                }else {
+                    Toast.fire({
+                            icon:'success',title:'Login failed!'
+                        });
+                }
+            },
+            
+            })
             window.location.href = "pages/home/home.php"
 
 
