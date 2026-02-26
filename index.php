@@ -170,7 +170,7 @@
             <div class="text-center">
                 <img class="profile-user-img img-fluid img-circle" src="dist/img/splogo.png" alt="User profile picture">
             </div>
-            <center>Sample Login</center>
+            <center>CSR POS Login</center>
             <input type="text" id="username" name="username" placeholder="Username">
             <input type="password" id="password" name="password" placeholder="Password">
             <button id="submit_login">Login</button>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 23, 2026 at 12:30 PM
+-- Generation Time: Feb 26, 2026 at 12:39 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,16 +18,16 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `student_management`
+-- Database: `csr`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `students`
+-- Table structure for table `users`
 --
 
-CREATE TABLE `students` (
+CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `firstname` varchar(50) NOT NULL,
   `lastname` varchar(50) NOT NULL,
@@ -45,21 +45,20 @@ CREATE TABLE `students` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `students`
+-- Dumping data for table `users`
 --
 
-INSERT INTO `students` (`id`, `firstname`, `lastname`, `middlename`, `age`, `year_level`, `course`, `section`, `username`, `password`, `contactno`, `account_type`, `created_at`, `updated_at`) VALUES
-(1, 'Jomar', 'Mutas', 'Mangao', 29, '3rd Year', 'BSIT', 'A', 'joms', '$2y$10$NHhtTLWiYQGwi72qjozuWeamgF36ydLjtlTWbu4cwPgL99SBmyQPi', '09101882719', 'Teacher', '2026-02-23 00:33:03', '2026-02-23 11:28:52'),
-(3, 'Francis', 'Malabo', 'Pangaral', 20, '3rd Year', 'BSIT', 'A', 'joms', '$2y$10$Axqr2VFZwIX6sKYYdgz6ieGyzPwp08e99OiHPTYgWxI2YZjSdkYvG', '09101882719', 'Student', '2026-02-23 11:07:55', '2026-02-23 11:28:31');
+INSERT INTO `users` (`id`, `firstname`, `lastname`, `middlename`, `age`, `year_level`, `course`, `section`, `username`, `password`, `contactno`, `account_type`, `created_at`, `updated_at`) VALUES
+(1, 'Jomar', 'Mutas', 'Mangao', 29, '3rd Year', 'BSIT', 'A', 'joms', '$2y$10$bmr.3xP0c3j1EROfLmfi4.v/Jm0HYl7.vgU/sO/OzOezuOfLIZ0vO', '09101882719', 'Teacher', '2026-02-23 00:33:03', '2026-02-26 10:52:50');
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `students`
+-- Indexes for table `users`
 --
-ALTER TABLE `students`
+ALTER TABLE `users`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -67,9 +66,9 @@ ALTER TABLE `students`
 --
 
 --
--- AUTO_INCREMENT for table `students`
+-- AUTO_INCREMENT for table `users`
 --
-ALTER TABLE `students`
+ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 COMMIT;
 
