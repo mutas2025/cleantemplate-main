@@ -14,12 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 try { 
                     // Hash the password before storing
                     $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-                    
-                    // Handle Terms Checkbox (1 if checked, 0 if not)
-                    $terms_agreed = isset($_POST['terms']) ? 1 : 0;
 
-                    $stmt = $pdo->prepare("INSERT INTO tbl_users (id_number, full_name, department, user_type, username, email, contact_number, password_hash, terms_agreed) 
-                                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"); 
+                    // Removed terms_agreed handling
+
+                    $stmt = $pdo->prepare("INSERT INTO tbl_users (id_number, full_name, department, user_type, username, email, contact_number, password_hash) 
+                                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)"); 
                     
                     $stmt->execute([ 
                         $_POST['id_number'], 
@@ -29,8 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_POST['username'],
                         $_POST['email'],
                         $_POST['contact_number'],
-                        $hashed_password, 
-                        $terms_agreed
+                        $hashed_password
+                        // Removed terms_agreed from array
                     ]); 
                     $success_message = "Member added successfully!"; 
                 } catch(PDOException $e) { 
@@ -44,9 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // In a real app, check if password field is empty to keep old hash.
                     $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
                     
-                    $terms_agreed = isset($_POST['terms']) ? 1 : 0;
+                    // Removed terms_agreed handling
 
-                    $stmt = $pdo->prepare("UPDATE tbl_users SET id_number=?, full_name=?, department=?, user_type=?, username=?, email=?, contact_number=?, password_hash=?, terms_agreed=? 
+                    $stmt = $pdo->prepare("UPDATE tbl_users SET id_number=?, full_name=?, department=?, user_type=?, username=?, email=?, contact_number=?, password_hash=? 
                                            WHERE user_id=?"); 
                     
                     // Note: user_id is the primary key in the new schema
@@ -59,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_POST['email'],
                         $_POST['contact_number'],
                         $hashed_password,
-                        $terms_agreed,
+                        // Removed terms_agreed from array
                         $_POST['user_id'] // The ID to update
                     ]); 
                     $success_message = "Member updated successfully!"; 
@@ -360,14 +359,7 @@ if (isset($_GET['edit_id'])) {
                                         </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <div class="icheck-primary d-inline">
-                                            <input type="checkbox" id="terms" name="terms" value="1">
-                                            <label for="terms">
-                                                I agree to the <a href="#">terms</a>
-                                            </label>
-                                        </div>
-                                    </div>
+                                    <!-- Terms Agreed Checkbox Removed Here -->
 
                                 </div>
                                 <div class="card-footer text-right">
@@ -510,14 +502,9 @@ if (isset($_GET['edit_id'])) {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="form-group">
-                                            <div class="icheck-primary d-inline">
-                                                <input type="checkbox" id="edit_terms" name="terms" value="1" <?php echo $edit_member['terms_agreed'] ? 'checked' : ''; ?>>
-                                                <label for="edit_terms">
-                                                    Terms Agreed
-                                                </label>
-                                            </div>
-                                        </div>
+                                        
+                                        <!-- Terms Agreed Checkbox Removed Here -->
+
                                     </div>
                                     <div class="card-footer text-right">
                                         <a href="" class="btn btn-default">Cancel</a>
