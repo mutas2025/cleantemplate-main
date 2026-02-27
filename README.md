@@ -1,3 +1,2 @@
-# cleantemplate
-Clean Template
-2-23-2026
+# csr_pos
+point-of-sales
