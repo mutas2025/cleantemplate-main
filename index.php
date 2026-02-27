@@ -197,28 +197,39 @@
                 toast.onmouseleave = Swal.resumeTimer;
             }
         });
-        $('#submit_login').click(function(e) {
+$('#submit_login').click(function(e) {
             e.preventDefault();
-            const usename = $('#username').val();
+            const username = $('#username').val();
             const password = $('#password').val();
             $.ajax({
-                url:'api/login.php',type: 'POST',consetType:'application/json',
-                data:JSON.stringify({username,password}),
-                success:function(response){
-                    if (response.status==='successs'){
+                url: 'api/login.php',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ username, password }),
+                success: function(response) {
+                    if (response.status === 'success') {
                         Toast.fire({
-                            icon:'success',title:'Login successful!'
+                            icon: 'success',
+                            title: 'Login successful!'
                         });
-                    setTimout(function(){
-                        window.location.href='pages/home/index.php';
-                    
-                    }, 1000);
-                }else {
+                        setTimeout(function() {
+                            window.location.href = 'pages/home/index.php';
+                        }, 1000);
+                    } else {
+                        Toast.fire({
+                            icon: 'error',
+                            title: response.message || 'Login failed!'
+                        });
+                    }
+                },
+                error: function() {
                     Toast.fire({
-                            icon:'success',title:'Login failed!'
-                        });
+                        icon: 'error',
+                        title: 'Server error!'
+                    });
                 }
-            },
+            
+       
             
             })
             window.location.href = "pages/home/home.php"
